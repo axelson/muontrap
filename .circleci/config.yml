@@ -1,0 +1,84 @@
+version: 2.0
+
+defaults: &defaults
+  working_directory: ~/work
+  environment:
+    ENV: CI
+    MIX_ENV: test
+    ELIXIR_VERSION: 1.6.0
+
+osx_install_erlang: &osx_install_erlang
+  run:
+    name: Install Erlang
+    command: |
+      brew install erlang
+
+install_elixir: &install_elixir
+  run:
+    name: Install Elixir
+    command: |
+      curl -LO https://github.com/elixir-lang/elixir/releases/download/v$ELIXIR_VERSION/Precompiled.zip
+      unzip -d $HOME/elixir Precompiled.zip
+      echo 'export PATH=$HOME/elixir/bin:$PATH' >> $BASH_ENV
+
+install_hex_rebar: &install_hex_rebar
+  run:
+    name: Install hex and rebar
+    command: |
+      mix local.hex --force
+      mix local.rebar --force
+
+install_cgroup_tools: &install_cgroup_tools
+  run:
+    name: Install cgroup-tools
+    command: |
+      sudo apt install cgroup-tools
+
+jobs:
+  run-osx:
+    <<: *defaults
+    shell: /bin/bash --login
+    macos:
+      xcode: "9.2.0"
+    steps:
+    - checkout
+    - <<: *osx_install_erlang
+    - <<: *install_elixir
+    - <<: *install_hex_rebar
+    - run:
+        name: Build
+        command: |
+          mix deps.get
+          mix compile
+    - run:
+        name: Test
+        command: mix test
+    - run:
+        name: Check formatting
+        command: mix format --check-formatted
+  run-linux:
+    <<: *defaults
+    docker:
+    - image: circleci/elixir:1.6.0
+    steps:
+    - checkout
+    - <<: *install_hex_rebar
+    - <<: *install_cgroup_tools
+    - run:
+        name: Build
+        command: |
+          mix deps.get
+          mix compile
+    - run:
+        name: Test
+        command: mix test
+    - run:
+        name: Check formatting
+        command: mix format --check-formatted
+
+workflows:
+  version: 2
+  test-and-deploy:
+    jobs:
+      - run-linux
+      - run-osx

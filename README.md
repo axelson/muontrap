@@ -1,6 +1,6 @@
 # MuonTrap
 
-[![Build Status](https://travis-ci.org/fhunleth/muontrap.svg?branch=master)](https://travis-ci.org/fhunleth/muontrap)
+[![CircleCI](https://circleci.com/gh/fhunleth/muontrap.svg?style=svg)](https://circleci.com/gh/fhunleth/muontrap)
 [![Hex version](https://img.shields.io/hexpm/v/muontrap.svg "Hex version")](https://hex.pm/packages/muontrap)
 
 --> Under active development - expect some API changes, but it's good enough for experimental use <--
